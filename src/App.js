@@ -16,9 +16,11 @@ import CoursesPage from './pages/CoursesPage.jsx';
 import CreateCoursePage from './pages/CreateCoursePage.jsx';
 import EditCoursePage from './pages/EditCoursePage.jsx';
 import AssessmentsPage from './pages/AssessmentsPage.jsx';
+import EditAssessmentPage from './pages/EditAssessmentPage.jsx'; // ✅ added
 import ResultsPage from './pages/ResultsPage.jsx';
 import AssessmentResultsPage from './pages/AssessmentResultsPage.jsx';
 import StudentsListPage from './pages/StudentsListPage.jsx';
+
 // Student Pages
 import StudentCourseListPage from './pages/StudentCourseListPage.jsx';
 import StudentAssessmentListPage from './pages/StudentAssessmentListPage.jsx';
@@ -52,10 +54,11 @@ function App() {
           <Route path="/courses/create" element={<PrivateRoute element={<CreateCoursePage />} />} />
           <Route path="/courses/edit/:id" element={<PrivateRoute element={<EditCoursePage />} />} />
           <Route path="/assessments" element={<PrivateRoute element={<AssessmentsPage />} />} />
+          <Route path="/edit-assessment/:id" element={<PrivateRoute element={<EditAssessmentPage />} />} /> {/* ✅ added */}
           <Route path="/results" element={<PrivateRoute element={<ResultsPage />} />} />
           <Route path="/assessments/:id/results" element={<PrivateRoute element={<AssessmentResultsPage />} />} />
-<Route path="/students" element={<PrivateRoute element={<StudentsListPage />} />} />
-          
+          <Route path="/students" element={<PrivateRoute element={<StudentsListPage />} />} />
+
           {/* Student Routes */}
           <Route path="/student/courses" element={<PrivateRoute element={<StudentCourseListPage />} />} />
           <Route path="/student/courses/:courseId/assessments" element={<PrivateRoute element={<StudentAssessmentListPage />} />} />

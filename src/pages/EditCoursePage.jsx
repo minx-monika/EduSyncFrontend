@@ -14,13 +14,24 @@ const EditCoursePage = () => {
     mediaUrl: ''
   });
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   useEffect(() => {
-    api.get(`/Courses/${id}`)
-      .then(res => {
+    const fetchCourse = async () => {
+      try {
+        const res = await api.get(`/Courses/${id}`);
         const { title, description, mediaUrl } = res.data;
         setForm({ title, description, mediaUrl });
-      })
-      .catch(err => console.error('Failed to load course', err));
+      } catch (err) {
+        console.error('Failed to load course', err);
+        setError('Failed to load course. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourse();
   }, [id]);
 
   const handleChange = (e) => {
@@ -30,16 +41,17 @@ const EditCoursePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/Courses/${id}`, {
-        ...form,
-        instructorId
-      });
-      navigate('/courses'); // or '/dashboard' if that’s your route
+      await api.put(`/Courses/${id}`, { ...form, instructorId });
+      navigate('/courses');
     } catch (err) {
       console.error('Failed to update course', err);
-      alert('Failed to update course. Please try again.');
+      setError('Update failed. Please try again.');
     }
   };
+
+  if (loading) {
+    return <p className="p-6 text-slate-600 dark:text-slate-300">Loading...</p>;
+  }
 
   return (
     <motion.div
@@ -48,7 +60,14 @@ const EditCoursePage = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <h2 className="text-2xl font-bold mb-6 text-purple-800 dark:text-white">Edit Course</h2>
+      <h2 className="text-3xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
+        Edit Course
+      </h2>
+
+      {error && (
+        <p className="mb-4 text-red-600 dark:text-red-400 text-sm">{error}</p>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Title</label>
@@ -84,7 +103,7 @@ const EditCoursePage = () => {
 
         <button
           type="submit"
-          className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-lg transition"
+          className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white py-2 rounded-lg transition"
         >
           Save Changes
         </button>

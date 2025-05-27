@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { motion } from 'framer-motion';
 
@@ -50,6 +51,17 @@ const AssessmentsPage = () => {
         console.error('Failed to create assessment', error);
         alert('Failed to create assessment. Check console.');
       }
+    }
+  };
+
+  const handleDeleteAssessment = async (assessmentId) => {
+    if (!window.confirm('Are you sure you want to delete this assessment?')) return;
+    try {
+      await api.delete(`/Assessments/${assessmentId}`);
+      fetchAssessments();
+    } catch (error) {
+      console.error('Failed to delete assessment:', error);
+      alert('Error deleting assessment. Check console.');
     }
   };
 
@@ -161,6 +173,21 @@ const AssessmentsPage = () => {
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   Max Score: <span className="font-medium">{a.maxScore}</span>
                 </p>
+
+                <div className="mt-4 flex justify-between items-center">
+                  <Link
+                    to={`/edit-assessment/${a.assessmentId}`}
+                    className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 text-sm rounded transition"
+                  >
+                    ✏️ Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteAssessment(a.assessmentId)}
+                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm rounded transition"
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
               </motion.div>
             );
           })}

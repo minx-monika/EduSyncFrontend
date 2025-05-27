@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { motion } from 'framer-motion';
@@ -7,6 +7,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,13 +26,36 @@ const Login = () => {
     }
   };
 
+  const toggleTheme = () => {
+    const newTheme = darkMode ? 'light' : 'dark';
+    setDarkMode(!darkMode);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-indigo-100 to-blue-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-purple-50 via-indigo-100 to-blue-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
+      {/* Toggle Theme */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-4 right-4 z-50 text-sm bg-slate-100 dark:bg-slate-700 dark:text-white text-slate-800 px-3 py-1 rounded shadow hover:shadow-md"
+      >
+        {darkMode ? '☀ Light' : '🌙 Dark'} Mode
+      </button>
+
+      {/* Animated Background Circles */}
+      <div className="absolute w-80 h-80 bg-purple-300 opacity-30 rounded-full top-[-100px] left-[-100px] blur-3xl animate-pulse"></div>
+      <div className="absolute w-72 h-72 bg-indigo-400 opacity-20 rounded-full bottom-[-90px] right-[-90px] blur-3xl animate-ping"></div>
+
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 bg-white dark:bg-slate-800 shadow-xl rounded-2xl overflow-hidden"
+        className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 bg-white dark:bg-slate-800 shadow-xl rounded-2xl overflow-hidden relative z-10"
       >
         {/* Left - Welcome Illustration */}
         <div className="hidden md:flex items-center justify-center bg-indigo-100 dark:bg-indigo-900 p-6">
@@ -39,11 +63,10 @@ const Login = () => {
             <h2 className="text-2xl font-semibold text-indigo-800 dark:text-indigo-300">Welcome Back!</h2>
             <p className="mt-2 text-sm text-indigo-600 dark:text-indigo-200">Learn. Grow. Succeed.</p>
             <img
-  src="/login-illustration.png"
-  alt="Education Illustration"
-  className="mt-6 w-full max-w-xs mx-auto drop-shadow-xl"
-/>
-
+              src="/login-illustration.png"
+              alt="Education Illustration"
+              className="mt-6 w-full max-w-xs mx-auto drop-shadow-xl"
+            />
           </div>
         </div>
 
@@ -87,7 +110,7 @@ const Login = () => {
           </form>
 
           <p className="text-sm mt-6 text-center text-slate-600 dark:text-slate-300">
-            Don’t have an account?{" "}
+            Don’t have an account?{' '}
             <Link to="/register" className="text-purple-500 hover:underline font-medium">Register here</Link>
           </p>
         </div>
