@@ -1,0 +1,173 @@
+import React, { useEffect, useState } from 'react';
+import api from '../api/axios';
+import { motion } from 'framer-motion';
+
+const AssessmentsPage = () => {
+  const [assessments, setAssessments] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [form, setForm] = useState({
+    courseId: '',
+    title: '',
+    maxScore: 100,
+    questions: '',
+  });
+
+  const fetchAssessments = async () => {
+    try {
+      const res = await api.get('/Assessments');
+      setAssessments(res.data);
+    } catch (err) {
+      console.error('Failed to fetch assessments', err);
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const res = await api.get('/Courses');
+      setCourses(res.data);
+    } catch (err) {
+      console.error('Failed to fetch courses', err);
+    }
+  };
+
+  const handleCreateAssessment = async (e) => {
+    e.preventDefault();
+    try {
+      JSON.parse(form.questions);
+      const payload = {
+        courseId: form.courseId,
+        title: form.title,
+        maxScore: form.maxScore,
+        questions: form.questions,
+      };
+      await api.post('/Assessments', payload);
+      setForm({ courseId: '', title: '', maxScore: 100, questions: '' });
+      fetchAssessments();
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        alert('❗ Please enter valid JSON for the Questions field.');
+      } else {
+        console.error('Failed to create assessment', error);
+        alert('Failed to create assessment. Check console.');
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+    fetchAssessments();
+  }, []);
+
+  return (
+    <motion.div
+      className="p-6 max-w-7xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-8 text-center">
+        Assessments
+      </h2>
+
+      {/* Create Assessment Form */}
+      <motion.form
+        onSubmit={handleCreateAssessment}
+        className="space-y-4 mb-12 bg-gradient-to-br from-white via-purple-50 to-indigo-100 dark:from-slate-800 dark:to-slate-700 p-6 rounded-xl shadow-lg border dark:border-slate-700"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h3 className="text-xl font-semibold mb-2 text-purple-700 dark:text-purple-300">Create New Assessment</h3>
+
+        <select
+          value={form.courseId}
+          onChange={(e) => setForm({ ...form, courseId: e.target.value })}
+          className="w-full px-4 py-2 rounded border border-purple-200 dark:border-slate-600 dark:bg-slate-700 text-slate-800 dark:text-white"
+          required
+        >
+          <option value="">Select a course</option>
+          {courses.map((course) => (
+            <option key={course.courseId} value={course.courseId}>
+              {course.title}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="text"
+          placeholder="Assessment Title"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          className="w-full px-4 py-2 border border-purple-200 dark:border-slate-600 rounded dark:bg-slate-700 text-slate-800 dark:text-white"
+          required
+        />
+
+        <textarea
+          placeholder={`[
+  {
+    "questionText": "What is 2 + 2?",
+    "options": ["1", "2", "4", "5"],
+    "correctAnswer": "4"
+  }
+]`}
+          value={form.questions}
+          onChange={(e) => setForm({ ...form, questions: e.target.value })}
+          className="w-full px-4 py-2 border border-purple-200 dark:border-slate-600 rounded dark:bg-slate-700 text-slate-800 dark:text-white"
+          rows={5}
+          required
+        />
+
+        <input
+          type="number"
+          placeholder="Max Score"
+          value={form.maxScore}
+          onChange={(e) => setForm({ ...form, maxScore: e.target.value })}
+          className="w-full px-4 py-2 border border-purple-200 dark:border-slate-600 rounded dark:bg-slate-700 text-slate-800 dark:text-white"
+        />
+
+        <button
+          type="submit"
+          className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-5 py-2.5 rounded-md font-semibold transition shadow-md"
+        >
+          ➕ Create Assessment
+        </button>
+      </motion.form>
+
+      {/* Assessment Cards */}
+      {assessments.length === 0 ? (
+        <p className="text-center text-slate-500 dark:text-slate-400">No assessments found.</p>
+      ) : (
+        <motion.div
+          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          initial="hidden"
+          animate="visible"
+          variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+        >
+          {assessments.map((a) => {
+            const course = courses.find((c) => c.courseId === a.courseId);
+            return (
+              <motion.div
+                key={a.assessmentId}
+                className="bg-white dark:bg-slate-800 shadow-md rounded-xl p-5 border border-purple-100 dark:border-slate-700 hover:shadow-xl transition-all"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <h4 className="text-lg font-semibold text-purple-700 dark:text-purple-300">
+                  {a.title}
+                </h4>
+                <p className="text-sm text-slate-500 dark:text-slate-300 mb-1">
+                  Course: <span className="font-medium">{course?.title || 'Unknown'}</span>
+                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Max Score: <span className="font-medium">{a.maxScore}</span>
+                </p>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
+export default AssessmentsPage;

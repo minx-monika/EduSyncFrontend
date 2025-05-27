@@ -1,0 +1,14 @@
+.bg-edu-gradient {
+  background: linear-gradient(135deg, #3B82F6, #9333EA);
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-blur {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent);
+  filter: blur(60px);
+  z-index: 0;
+}
