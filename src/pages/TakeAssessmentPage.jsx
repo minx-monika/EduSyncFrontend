@@ -10,7 +10,7 @@ const TakeAssessmentPage = () => {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
-  const [startTime, setStartTime] = useState(null);
+  const [startTime, setStartTime] = useState(Date.now());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,10 +18,20 @@ const TakeAssessmentPage = () => {
       try {
         const res = await api.get(`/Assessments/${id}`);
         setAssessment(res.data);
-        setQuestions(JSON.parse(res.data.questions));
-        setStartTime(Date.now());
+
+        let parsedQuestions = [];
+        try {
+          parsedQuestions = res.data.questions ? JSON.parse(res.data.questions) : [];
+          if (!Array.isArray(parsedQuestions)) throw new Error();
+        } catch {
+          console.warn('Invalid questions format from API');
+          parsedQuestions = [];
+        }
+
+        setQuestions(parsedQuestions);
       } catch (err) {
-        console.error('Failed to load assessment', err);
+        console.error('Failed to load assessment or parse questions', err);
+        setQuestions([]);
       }
     };
 
@@ -158,7 +168,7 @@ const TakeAssessmentPage = () => {
         })}
       </motion.form>
 
-      {!submitted && (
+      {!submitted && questions.length > 0 && (
         <button
           onClick={handleSubmit}
           className="mt-8 block mx-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition"
